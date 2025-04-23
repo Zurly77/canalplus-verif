@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Vérification CANAL+</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+    html, body {
+      overflow: hidden;
+    }
+    body {
+      background-color: #0e0e19;
+      font-family: 'Poppins', sans-serif;
+      color: #ffffff;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .card {
+      background-color: #171827;
+      width: 460px;
+      padding: 40px 30px;
+      border-radius: 20px;
+      text-align: center;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.6);
+    }
+    .logo {
+      background-color: #000;
+      color: #fff;
+      font-size: 36px;
+      font-weight: 800;
+      padding: 8px 24px;
+      display: inline-block;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+    .secure {
+      font-size: 14px;
+      font-weight: 400;
+      color: #3fa9f5;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .secure::before {
+      font-family: "Font Awesome 6 Free";
+      font-weight: 900;
+      content: "\f023";
+      color: #3fa9f5;
+      font-size: 16px;
+    }
+    h2 {
+      font-size: 20px;
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+    h2::after {
+      content: "";
+      display: block;
+      width: 60px;
+      height: 3px;
+      margin: 8px auto 0;
+      background-color: #3fa9f5;
+      border-radius: 2px;
+    }
+    p {
+      font-size: 14px;
+      color: #a6aabf;
+      margin-bottom: 30px;
+    }
+    .slider {
+      position: relative;
+      background: #171827;
+      border: 1.5px solid #3fa9f5;
+      border-radius: 30px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+      padding: 0 16px;
+    }
+    .slider-fill {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      background: linear-gradient(90deg, #06beb6, #48b1bf);
+      z-index: 0;
+      width: 0;
+      transition: width 0.1s linear;
+    }
+    .slider-button {
+      background-color: #fff;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      color: #3fa9f5;
+      position: absolute;
+      left: 8px;
+      top: 7px;
+      transition: left 0.1s linear;
+      z-index: 2;
+      cursor: grab;
+      touch-action: none;
+    }
+    .slider-text {
+      flex: 1;
+      text-align: center;
+      font-size: 14px;
+      color: #d0d7e1;
+      z-index: 1;
+      position: relative;
+      transition: color 0.3s ease;
+    }
+    .slider-confirm {
+      margin-top: 10px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #32dfb4;
+      display: none;
+    }
+    .footer {
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 12px;
+      font-weight: 400;
+      margin-top: 25px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+    }
+    .footer::before {
+      font-family: "Font Awesome 6 Free";
+      font-weight: 900;
+      content: "\f023";
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo">CANAL+</div>
+    <div class="secure">Vérification sécurisée</div>
+    <h2>Confirmer que vous êtes humain</h2>
+    <p>Pour protéger votre compte et nos services, nous devons vérifier que vous n’êtes pas un robot.</p>
+    <div class="slider" id="slider">
+      <div class="slider-fill" id="sliderFill"></div>
+      <div class="slider-button" id="sliderBtn">➜</div>
+      <div class="slider-text" id="sliderText">Glissez pour vérifier</div>
+    </div>
+    <div class="slider-confirm" id="sliderConfirm">Vérification réussie ! Vous allez être redirigé...</div>
+    <div class="footer">Système de sécurité CANAL+</div>
+  </div>
+
+  <script>
+    const slider = document.getElementById('slider');
+    const button = document.getElementById('sliderBtn');
+    const fill = document.getElementById('sliderFill');
+    const text = document.getElementById('sliderText');
+    const confirm = document.getElementById('sliderConfirm');
+
+    let isDragging = false;
+    let startX;
+    const maxRight = slider.offsetWidth - button.offsetWidth - 12;
+
+    const getClientX = (e) => e.touches ? e.touches[0].clientX : e.clientX;
+
+    const startDrag = (e) => {
+      isDragging = true;
+      startX = getClientX(e) - button.offsetLeft;
+      button.style.cursor = 'grabbing';
+    };
+
+    const moveDrag = (e) => {
+      if (!isDragging) return;
+      const x = getClientX(e) - startX;
+      const newX = Math.min(Math.max(8, x), maxRight);
+      button.style.left = newX + 'px';
+      fill.style.width = (newX + button.offsetWidth) + 'px';
+
+      if (newX >= maxRight) {
+        text.textContent = 'Vérification réussie';
+        text.style.color = '#32dfb4';
+        confirm.style.display = 'block';
+        setTimeout(() => {
+          // window.location.href = "https://tonsite.com";
+        }, 3000);
+      }
+    };
+
+    const endDrag = () => {
+      if (!isDragging) return;
+      if (parseInt(button.style.left) < maxRight) {
+        button.style.left = '8px';
+        fill.style.width = '0px';
+        text.textContent = 'Glissez pour vérifier';
+        text.style.color = '#d0d7e1';
+        confirm.style.display = 'none';
+      }
+      button.style.cursor = 'grab';
+      isDragging = false;
+    };
+
+    button.addEventListener('mousedown', startDrag);
+    document.addEventListener('mousemove', moveDrag);
+    document.addEventListener('mouseup', endDrag);
+
+    button.addEventListener('touchstart', startDrag, { passive: false });
+    document.addEventListener('touchmove', moveDrag, { passive: false });
+    document.addEventListener('touchend', endDrag);
+  </script>
+</body>
+</html>
